@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Templater", "Templater\Templater.csproj", "{83EC166F-5708-44F5-8982-C5B64940033F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Templater.Test", "Templater.Test\Templater.Test.csproj", "{8A1353AB-0575-4B8C-A70E-BA58C6D526C1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{376448E5-70A4-4F76-B7E8-04DEA45CB4D4}"
+	ProjectSection(SolutionItems) = preProject
+		Local.testsettings = Local.testsettings
+		Templater.vsmdi = Templater.vsmdi
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = Templater.vsmdi
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83EC166F-5708-44F5-8982-C5B64940033F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83EC166F-5708-44F5-8982-C5B64940033F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83EC166F-5708-44F5-8982-C5B64940033F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83EC166F-5708-44F5-8982-C5B64940033F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A1353AB-0575-4B8C-A70E-BA58C6D526C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A1353AB-0575-4B8C-A70E-BA58C6D526C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A1353AB-0575-4B8C-A70E-BA58C6D526C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A1353AB-0575-4B8C-A70E-BA58C6D526C1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
