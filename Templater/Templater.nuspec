@@ -4,15 +4,15 @@
     <id>nTemplater</id>
     <version>$version$</version>
     <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
+    <authors>Nicolas</authors>
+    <owners>Nicolas</owners>
     <projectUrl>https://github.com/npenin/templater/tree/master</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>This project is based on Jint to help making templates. It can be mail templates or anything else you might want to template. Since it is based on Jint you can use full javascript code within you templates.</description>
     <!--<releaseNotes>Summary of changes made in this release of the package.</releaseNotes>-->
     <copyright>Copyright 2015</copyright>
     <dependencies>
-      <dependency id="Jint" version="2.4" />
+      <dependency id="Jint" version="2.11.58" />
     </dependencies>
   </metadata>
   <files>
