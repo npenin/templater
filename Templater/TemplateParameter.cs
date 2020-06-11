@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Runtime.Serialization;
-
-namespace Templater
+﻿namespace Templater
 {
     public class TemplateParameter
     {
@@ -18,8 +12,8 @@ namespace Templater
 
         public object Value { get; set; }
 
-        public virtual bool IsFunction { get { return false; } }
-        public virtual bool IsScript { get { return false; } }
+        public virtual bool IsFunction => false;
+        public virtual bool IsScript => false;
     }
 
     public class ScriptTemplateParameter : TemplateParameter
@@ -29,7 +23,7 @@ namespace Templater
         {
         }
 
-        public override bool IsScript { get { return true; } }
+        public override bool IsScript => true;
     }
 
     public class ScriptToFunctionTemplateParameter : ScriptTemplateParameter
@@ -39,7 +33,7 @@ namespace Templater
         {
         }
 
-        public override bool IsFunction { get { return true; } }
+        public override bool IsFunction => true;
     }
 
 
@@ -52,6 +46,6 @@ namespace Templater
 
         }
 
-        public override bool IsFunction { get { return true; } }
+        public override bool IsFunction => true;
     }
 }

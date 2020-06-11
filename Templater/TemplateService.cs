@@ -4,10 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Jint;
-using System.Web;
-using System.Globalization;
-using System.IO;
-using System.Diagnostics;
 using Jint.Native;
 
 namespace Templater
@@ -81,7 +77,7 @@ namespace Templater
         /// </summary>
         /// <param name="template"></param>
         /// <returns></returns>
-        private string GenerateScriptTemplate(string template)
+        public string GenerateScriptTemplate(string template)
         {
             var matches = activeTokensRegex.Matches(template);
 
