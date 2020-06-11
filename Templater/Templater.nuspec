@@ -16,6 +16,6 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\$configuration$\Templater.dll" target="lib\net4\Templater.dll" />
+    <file src="bin\netstandard1.4\Templater.dll" target="lib\net4\Templater.dll" />
   </files>
 </package>
