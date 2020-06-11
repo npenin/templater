@@ -130,7 +130,7 @@ namespace Templater
 
         public event Action<Engine> PrepareEngine;
 
-        private Engine CreateEngine(StringBuilder output)
+        public Engine CreateEngine(StringBuilder output)
         {
             var engine = new Engine();
 
@@ -148,7 +148,7 @@ namespace Templater
             return engine;
         }
 
-        private void SetParameters(Engine engine, IEnumerable<TemplateParameter> parameters)
+        public void SetParameters(Engine engine, IEnumerable<TemplateParameter> parameters)
         {
             if (parameters != null)
             {
