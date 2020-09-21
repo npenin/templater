@@ -1,8 +1,5 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Web;
 
 namespace Templater.Test
@@ -11,9 +8,9 @@ namespace Templater.Test
     /// Summary description for UnitTest1
     /// </summary>
     [TestClass]
-    public class TestTemplateService
+    public class TestJintTemplateService
     {
-        public TestTemplateService()
+        public TestJintTemplateService()
         {
             //
             // TODO: Add constructor logic here
@@ -28,14 +25,8 @@ namespace Templater.Test
         ///</summary>
         public TestContext TestContext
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            get => testContextInstance;
+            set => testContextInstance = value;
         }
 
         #region Additional test attributes
@@ -60,21 +51,37 @@ namespace Templater.Test
         //
         #endregion
 
+        public static TemplateJintService Create()
+        {
+            return new TemplateJintService();
+        }
+
+        public static TemplateJintService Create(string startExpressionToken, string startStatementToken, string endToken)
+        {
+            return new TemplateJintService(startExpressionToken, startStatementToken, endToken);
+        }
+
+        public static TemplateJintService Create(TemplateMode mode)
+        {
+            return new TemplateJintService(mode);
+        }
+
+
         [TestMethod]
         public void TestBasicUsage()
         {
-            Assert.AreEqual("pwet", new TemplateService().Process("<%= pwic %>", new TemplateParameter("pwic", "pwet")));
-            Assert.AreEqual("pwet", new TemplateService(TemplateMode.HtmlEscaped).Process("&lt;%= pwic %&gt;", new TemplateParameter("pwic", "pwet")));
+            Assert.AreEqual("pwet", Create().Process("<%= pwic %>", new TemplateParameter("pwic", "pwet")));
+            Assert.AreEqual("pwet", Create(TemplateMode.HtmlEscaped).Process("&lt;%= pwic %&gt;", new TemplateParameter("pwic", "pwet")));
         }
 
         [TestMethod]
         public void TestScriptTransformation()
         {
-            TemplateService templateService = new TemplateService(TemplateMode.HtmlEscaped);
+            TemplateService templateService = Create(TemplateMode.HtmlEscaped);
             templateService.TransformFoundScript += new Func<string, string>(templateService_TransformFoundScript);
             Assert.AreEqual("pwet", templateService.Process("&lt;% if(1&lt;2) write(&quot;pwet&quot;); %&gt;"));
             //Assert.AreEqual("pwet", templateService.Process("&lt;% if(1&lt;2) %&lt; &lt;%= 'pwet' %&gt;"));
-            templateService = new TemplateService(TemplateMode.Standard);
+            templateService = Create(TemplateMode.Standard);
             templateService.TransformFoundScript += new Func<string, string>(templateService_TransformFoundScript);
             Assert.AreEqual("pwet", templateService.Process("<% if(2>1) { %><%= 'pwet' %><% } %><% else if(2>1) { %><%= 'pwic' %><% } %>"));
             Assert.AreEqual("pwic", templateService.Process("<% if(1>2) { %><%= 'pwet' %><% } %><% else if(2>1) { %><%= 'pwic' %><% } %>"));
@@ -83,22 +90,20 @@ namespace Templater.Test
         [TestMethod]
         public void TestEnginePreparation()
         {
-            TemplateService templateService = new TemplateService();
+            TemplateJintService templateService = Create();
             templateService.PrepareEngine += new System.Action<Jint.Engine>(templateService_PrepareEngine);
             Assert.AreEqual("pwet", templateService.Process("<% write('pwet'); %>"));
-            templateService = new TemplateService(TemplateMode.HtmlEscaped);
+            templateService = Create(TemplateMode.HtmlEscaped);
             templateService.PrepareEngine += new System.Action<Jint.Engine>(templateService_PrepareEngine);
             Assert.AreEqual("pwet", templateService.Process("&lt;% write2('pwet'); %&gt;"));
         }
 
-
-
-        void templateService_PrepareEngine(Jint.Engine engine)
+        private void templateService_PrepareEngine(Jint.Engine engine)
         {
             engine.SetValue("write2", new Action<string>(s => engine.GetValue("write").As<Jint.Native.Function.FunctionInstance>().Call(engine.Global, new[] { new Jint.Native.JsValue(s) })));
         }
 
-        string templateService_TransformFoundScript(string arg)
+        private string templateService_TransformFoundScript(string arg)
         {
             return HttpUtility.HtmlDecode(arg);
         }

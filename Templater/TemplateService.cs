@@ -3,15 +3,73 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Jint;
-using Jint.Native;
 
 namespace Templater
 {
+
     /// <summary>
     /// Mail service exposing static methods to send mails
     /// </summary>
-    public class TemplateService
+    public abstract class TemplateService<TEngine> : TemplateService
+    {
+        public TemplateService()
+            : base(TemplateMode.Standard)
+        {
+
+        }
+
+        public TemplateService(string startExpressionToken, string startStatementToken, string endToken)
+            : base(startExpressionToken, startStatementToken, endToken)
+        {
+        }
+
+        public TemplateService(TemplateMode mode)
+            : base(mode)
+        {
+        }
+        public event Action<TEngine> PrepareEngine;
+
+        public abstract TEngine CreateEngine(StringBuilder output);
+
+        protected void RaisePrepareEngine(TEngine engine)
+        {
+            PrepareEngine?.Invoke(engine);
+        }
+
+        public abstract void SetParameters(TEngine engine, IEnumerable<TemplateParameter> parameters);
+
+        public override string Process(string template, params TemplateParameter[] parameters)
+        {
+            return Process(new string[] { template }, parameters).FirstOrDefault();
+        }
+
+        protected abstract void Execute(TEngine engine, string script);
+
+        public override IEnumerable<string> Process(IEnumerable<string> textsToProcess, IEnumerable<TemplateParameter> parameters = null, params TemplateParameter[] parameters2)
+        {
+            StringBuilder sb = new StringBuilder();
+            TEngine engine = CreateEngine(sb);
+
+            List<string> processedTexts = new List<string>();
+
+            SetParameters(engine, parameters);
+            SetParameters(engine, parameters2);
+
+            foreach (string textToProcess in textsToProcess)
+            {
+                if (!string.IsNullOrWhiteSpace(textToProcess))
+                {
+                    Execute(engine, GenerateScriptTemplate(textToProcess));
+                }
+
+                processedTexts.Add(sb.ToString());
+                sb.Clear();
+            }
+
+            return processedTexts;
+        }
+    }
+    public abstract class TemplateService
     {
         public TemplateService()
             : this(TemplateMode.Standard)
@@ -54,10 +112,6 @@ namespace Templater
 
         public event Func<string, string> TransformFoundScript;
 
-        public string Process(string template, params TemplateParameter[] parameters)
-        {
-            return Process(new string[] { template }, parameters).FirstOrDefault();
-        }
 
         private enum States
         {
@@ -79,7 +133,7 @@ namespace Templater
         /// <returns></returns>
         public string GenerateScriptTemplate(string template)
         {
-            var matches = activeTokensRegex.Matches(template);
+            MatchCollection matches = activeTokensRegex.Matches(template);
 
             StringBuilder result = new StringBuilder();
 
@@ -92,7 +146,10 @@ namespace Templater
                 {
                     case States.Text:
                         if (match.Index != index)
+                        {
                             result.AppendFormat("write('{0}'); ", EscapeStringLiteral(template.Substring(index, match.Index - index)).Replace("\r", "\\r").Replace("\n", "\\n"));
+                        }
+
                         break;
                     case States.Statement:
                         result.AppendFormat("{0}", RaiseTransformFoundScript(template.Substring(index, match.Index - index).Replace("<br />", "\n")));
@@ -107,11 +164,17 @@ namespace Templater
                 index = match.Index + match.Value.Length;
 
                 if (match.Value == StartExpressionToken)
+                {
                     state = States.Expression;
+                }
                 else if (match.Value == StartStatementToken)
+                {
                     state = States.Statement;
+                }
                 else if (match.Value == EndToken)
+                {
                     state = States.Text;
+                }
             }
 
             result.AppendFormat("write('{0}'); ", EscapeStringLiteral(template.Substring(index)).Replace("\r", "\\r").Replace("\n", "\\n"));
@@ -122,81 +185,18 @@ namespace Templater
         private string RaiseTransformFoundScript(string p)
         {
             if (TransformFoundScript != null)
+            {
                 foreach (Func<string, string> handler in TransformFoundScript.GetInvocationList())
+                {
                     p = handler(p);
+                }
+            }
 
             return p;
         }
 
-        public event Action<Engine> PrepareEngine;
+        public abstract string Process(string template, params TemplateParameter[] parameters);
+        public abstract IEnumerable<string> Process(IEnumerable<string> textsToProcess, IEnumerable<TemplateParameter> parameters = null, params TemplateParameter[] parameters2);
 
-        public Engine CreateEngine(StringBuilder output)
-        {
-            var engine = new Engine();
-
-            engine.SetValue("write", new Action<object>(s =>
-            {
-                if (s is TemplateParameter)
-                    engine.Execute((string)((TemplateParameter)s).Value);
-                else
-                    output.Append(s);
-            }));
-
-            if (PrepareEngine != null)
-                PrepareEngine(engine);
-
-            return engine;
-        }
-
-        public void SetParameters(Engine engine, IEnumerable<TemplateParameter> parameters)
-        {
-            if (parameters != null)
-            {
-                foreach (TemplateParameter parameter in parameters)
-                {
-                    if (parameter.IsFunction && parameter.Value != null)
-                    {
-                        if (parameter.IsScript)
-                            engine.SetValue(parameter.Name, engine.Function.CreateFunctionObject(new Jint.Parser.Ast.FunctionDeclaration
-                            {
-                                Body = new Jint.Parser.Ast.BlockStatement
-                                {
-                                    Body = new Jint.Parser.JavaScriptParser().Parse(parameter.Value.ToString()).Body
-                                }
-                            }));
-                        else
-                            engine.SetValue(parameter.Name, (Delegate)parameter.Value);
-                    }
-                    else if (parameter.IsScript && parameter.Value != null)
-                    {
-                        parameter.Value = GenerateScriptTemplate(parameter.Value.ToString());
-                        engine.SetValue(parameter.Name, parameter);
-                    }
-                    else
-                        engine.SetValue(parameter.Name, parameter.Value);
-                }
-            }
-        }
-
-        public IEnumerable<string> Process(IEnumerable<string> textsToProcess, IEnumerable<TemplateParameter> parameters = null, params TemplateParameter[] parameters2)
-        {
-            StringBuilder sb = new StringBuilder();
-            var engine = CreateEngine(sb);
-
-            List<string> processedTexts = new List<string>();
-
-            SetParameters(engine, parameters);
-            SetParameters(engine, parameters2);
-
-            foreach (var textToProcess in textsToProcess)
-            {
-                if (!string.IsNullOrWhiteSpace(textToProcess))
-                    engine.Execute(GenerateScriptTemplate(textToProcess));
-                processedTexts.Add(sb.ToString());
-                sb.Clear();
-            }
-
-            return processedTexts;
-        }
     }
 }
