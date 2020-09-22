@@ -30,6 +30,7 @@ namespace Templater
         public override ScriptEngine CreateEngine(StringBuilder output)
         {
             ScriptEngine engine = new ScriptEngine();
+            engine.EnableExposedClrTypes = true;
 
             engine.SetGlobalFunction("write", new Action<object>(s =>
             {
