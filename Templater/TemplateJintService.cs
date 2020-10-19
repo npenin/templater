@@ -58,13 +58,9 @@ namespace Templater
                     {
                         if (parameter.IsScript)
                         {
-                            engine.SetValue(parameter.Name, engine.Function.CreateFunctionObject(new Jint.Parser.Ast.FunctionDeclaration
-                            {
-                                Body = new Jint.Parser.Ast.BlockStatement
-                                {
-                                    Body = new Jint.Parser.JavaScriptParser().Parse(parameter.Value.ToString()).Body
-                                }
-                            }));
+                            engine.SetValue(parameter.Name, engine.Function.CreateFunctionObject(new Esprima.Ast.FunctionDeclaration(new Esprima.Ast.Identifier(parameter.Name), new Esprima.Ast.NodeList<Esprima.Ast.Expression>(), new Esprima.Ast.BlockStatement(
+                                new Esprima.JavaScriptParser(parameter.Value.ToString()).ParseScript().Body
+                                ), false, true, false), Jint.Runtime.Environments.LexicalEnvironment.NewDeclarativeEnvironment(engine)));
                         }
                         else
                         {
