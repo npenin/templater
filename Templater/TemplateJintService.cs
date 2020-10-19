@@ -26,10 +26,9 @@ namespace Templater
         {
         }
 
-
-        public override Engine CreateEngine(StringBuilder output)
+        public Engine CreateEngine(StringBuilder output, Action<Options> options)
         {
-            Engine engine = new Engine();
+            Engine engine = new Engine(options);
 
             engine.SetValue("write", new Action<object>(s =>
             {
@@ -46,6 +45,12 @@ namespace Templater
             RaisePrepareEngine(engine);
 
             return engine;
+        }
+
+
+        public override Engine CreateEngine(StringBuilder output)
+        {
+            return CreateEngine(output, (options) => { });
         }
 
         public override void SetParameters(Engine engine, IEnumerable<TemplateParameter> parameters)
