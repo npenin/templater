@@ -100,7 +100,7 @@ namespace Templater.Test
 
         private void templateService_PrepareEngine(Jint.Engine engine)
         {
-            engine.SetValue("write2", new Action<string>(s => engine.GetValue("write").As<Jint.Native.Function.FunctionInstance>().Call(engine.Global, new[] { new Jint.Native.JsValue(s) })));
+            engine.SetValue("write2", new Action<string>(s => engine.GetValue("write").As<Jint.Native.Function.FunctionInstance>().Call(engine.Global, new Jint.Native.JsValue[] { s })));
         }
 
         private string templateService_TransformFoundScript(string arg)
