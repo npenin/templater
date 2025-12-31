@@ -1,4 +1,6 @@
-﻿using Jint;
+﻿using Acornima.Ast;
+using Jint;
+using Jint.Native;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -47,7 +49,6 @@ namespace Templater
             return engine;
         }
 
-
         public override Engine CreateEngine(StringBuilder output)
         {
             return CreateEngine(output, (options) => { });
@@ -63,9 +64,9 @@ namespace Templater
                     {
                         if (parameter.IsScript)
                         {
-                            engine.SetValue(parameter.Name, engine.Function.CreateFunctionObject(new Esprima.Ast.FunctionDeclaration(new Esprima.Ast.Identifier(parameter.Name), new Esprima.Ast.NodeList<Esprima.Ast.Expression>(), new Esprima.Ast.BlockStatement(
-                                new Esprima.JavaScriptParser(parameter.Value.ToString()).ParseScript().Body
-                                ), false, true, false), Jint.Runtime.Environments.LexicalEnvironment.NewDeclarativeEnvironment(engine)));
+                            var script = Engine.PrepareScript(parameter.Value.ToString(), "templateParam." + parameter.Name);
+                            // Updated for Jint 4.4.2 - Esprima is no longer used
+                            engine.SetValue(parameter.Name, (Action<JsValue>)((templater) => engine.Evaluate(script)));
                         }
                         else
                         {
