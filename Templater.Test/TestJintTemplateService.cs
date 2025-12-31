@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Jint;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using System.Web;
 
 namespace Templater.Test
 {
@@ -66,7 +66,6 @@ namespace Templater.Test
             return new TemplateJintService(mode);
         }
 
-
         [TestMethod]
         public void TestBasicUsage()
         {
@@ -100,12 +99,13 @@ namespace Templater.Test
 
         private void templateService_PrepareEngine(Jint.Engine engine)
         {
-            engine.SetValue("write2", new Action<string>(s => engine.GetValue("write").As<Jint.Native.Function.FunctionInstance>().Call(engine.Global, new Jint.Native.JsValue[] { s })));
+            engine.SetValue("write2", new Action<string>(s => ((Jint.Native.Function.Function)engine.GetValue("write")).Call(s)));
         }
 
         private string templateService_TransformFoundScript(string arg)
         {
-            return HttpUtility.HtmlDecode(arg);
+            // Simple HTML decode for basic entities
+            return arg.Replace("<", "<").Replace(">", ">").Replace("\"", "\\\"").Replace("&", "&");
         }
     }
 }
